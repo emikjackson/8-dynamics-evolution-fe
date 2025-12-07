@@ -213,8 +213,8 @@
 	.outer {
 		background-color: var(--sky);
 		min-height: 100vh;
-		background-image: url('$lib/assets/cloud-1.png'), url('$lib/assets/cloud-4.png'),
-			url('$lib/assets/cloud-5.png');
+		background-image:
+			url('$lib/assets/cloud-1.png'), url('$lib/assets/cloud-4.png'), url('$lib/assets/cloud-5.png');
 		background-repeat: no-repeat, no-repeat, no-repeat;
 		background-blend-mode: overlay, overlay, overlay;
 		background-position:

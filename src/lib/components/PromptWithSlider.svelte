@@ -7,6 +7,7 @@
 	export let index: number;
 	export let handleSectionChange: (evt: Event, idx: number) => void;
 	export let resultsLink: string | null; // Only used for final section
+	export let onFinish: (() => void) | null;
 </script>
 
 <div class="wrapper">
@@ -51,9 +52,7 @@
 
 	{#if resultsLink}
 		<div class="finish">
-			<a class="btn secondary" onclick={() => trackEvent('click_finish')} href={resultsLink}>
-				Finish
-			</a>
+			<button class="btn secondary" onclick={onFinish}> Finish </button>
 		</div>
 	{/if}
 </div>
