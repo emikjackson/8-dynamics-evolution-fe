@@ -7,7 +7,10 @@
 	import { onDestroy, onMount } from 'svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import ButtonLoader from '$lib/components/ButtonLoader.svelte';
+	import { prettyCode } from '$lib/helpers/results';
+	import CopyBox from '$lib/components/CopyBox.svelte';
 	import trackEvent from '$lib/custom-event';
+	import { enhance } from '$app/forms';
 
 	const INTERVAL = 1500;
 	const BREAKPOINT = 900;
@@ -77,12 +80,17 @@
 	<Modal handleClose={closeModal}>
 		{#if !sendEmailFinished}
 			<!-- Email form -->
-			<h1 class="title modal-title">Email your results</h1>
-			<p>Email yourself a link to this page so you can reference your results later.</p>
+			<h1 class="title modal-title">Email Your Code</h1>
+			<p>
+				We'll send you an email with your results code for safekeeping. We'll also include a link to
+				return to these results. Your email will not be stored.
+			</p>
 			{#if emailError.length > 0}
 				<p class="error">{emailError}</p>
 			{/if}
 			<form
+				data-sveltekit-noscroll
+				use:enhance
 				onsubmit={async (e) => {
 					if (email === '') {
 						emailError = 'Please enter an email address';
@@ -130,15 +138,22 @@
 				<button class="btn primary" onclick={closeModal}>Done</button>
 			</div>
 		{:else}
+			<h1 class="title">Need MailChimp Auth</h1>
+			<p>
+				Emi here - I'll need to grab the MailChimp API key from Amy (we can find this together!)
+			</p>
+			<div class="buttons done">
+				<button class="btn primary" onclick={closeModal}>Done</button>
+			</div>
 			<!-- Error message -->
-			<h1 class="title">Oops!</h1>
+			<!-- <h1 class="title">Oops!</h1>
 			<p>
 				Looks like something went wrong on our end and we couldn't send your email. Please try again
 				later.
 			</p>
 			<div class="buttons done">
 				<button class="btn primary" onclick={closeModal}>Done</button>
-			</div>
+			</div> -->
 		{/if}
 	</Modal>
 {/if}
@@ -148,42 +163,61 @@
 		<Logo />
 	</header>
 	<main>
-		<div class="intro fade-in">
-			<a onclick={() => trackEvent('click_retake_quiz')} href="/">← Retake the Quiz</a>
-			<h1 class="title">Your Results</h1>
-		</div>
-		<div class="chart fade-in delayed" aria-hidden="true" bind:clientWidth={chartWidth}>
-			<SpiderChart answers={data.object} {highlight} {chartWidth} {onHover} onLeave={startRotate} />
-		</div>
-		<div class="results fade-in">
-			<DynamicSlider
-				{highlight}
-				answers={data.answers.map((a) => a.value)}
-				{onHover}
-				onLeave={startRotate}
-			/>
-
-			<div class="next-steps">
-				<h2>Take a moment to pause and reflect.</h2>
-				<p>If you have a notebook on hand, jot down your responses.</p>
-				<ul>
-					<li>Looking at your results, what insights arise for you?</li>
-					<li>
-						Given what feels wobbly and what feels strong, pick one dynamic that might support your
-						own deep, sustained, and courageous climate engagement. How could you invest in it with
-						intention? What support do you need?
-					</li>
-				</ul>
-				<div class="actions">
-					<button class="btn secondary" onclick={openModal}>Email Your Results</button>
-					<a href="https://www.allwecansave.earth/dynamics-resources" class="btn secondary"
-						>Resources for Support</a
-					>
-				</div>
+		<section class="clouds">
+			<div class="intro fade-in">
+				<a onclick={() => trackEvent('click_retake_quiz')} href="/">← Retake the Quiz</a>
+				<h1 class="title">Your Starting Point Results</h1>
 			</div>
-		</div>
+			<div class="chart fade-in delayed" aria-hidden="true" bind:clientWidth={chartWidth}>
+				<SpiderChart
+					answers={data.current?.object}
+					{highlight}
+					{chartWidth}
+					{onHover}
+					onLeave={startRotate}
+				/>
+			</div>
+			<div class="results fade-in">
+				<DynamicSlider
+					{highlight}
+					answers={data.current?.answers.map((a) => a.value)}
+					{onHover}
+					onLeave={startRotate}
+				/>
+			</div>
+		</section>
+		<section class="up-next">
+			<div class="column">
+				<p class="pre-title">Next Steps</p>
+				<h1 class="title">Save Your Results Code</h1>
+				<div class="instructions">
+					<p>
+						In order to visualize shift at the end of your Climate Wayfinding journey, we’ve
+						generated you a unique code ({data.code}) to reference these results later.
+					</p>
+					<p>
+						We recommend writing or storing your code somewhere secure. Try a password manager, a
+						favorite journal, or an email to yourself. If you email yourself your code with the
+						button below, your email will not be stored and your results will remain fully
+						anonymous.
+					</p>
+				</div>
+				<button onclick={() => (showEmailModal = true)} class="btn primary"
+					>Email Your Results Code</button
+				>
+				<label>
+					<span>Your Unique Code</span>
+					<CopyBox text={prettyCode(data.code)} textToCopy={data.code} />
+				</label>
+			</div>
+		</section>
+		<section class="conclusion">
+			<div class="column">
+				<a class="fancy-link" href="/">← Return to Start</a>
+			</div>
+		</section>
 	</main>
-	<footer>
+	<!-- <footer>
 		© 2024 The All We Can Save Project. Developers <a
 			href="https://github.com/chelshaw"
 			target="_blank"
@@ -194,7 +228,7 @@
 		<a href="https://www.linkedin.com/in/li-helen" target="_blank" rel="noopener nofollow"
 			>Helen Li</a
 		> brought this interactive tool to life.
-	</footer>
+	</footer> -->
 </div>
 
 <style>
@@ -213,6 +247,10 @@
 	.outer {
 		background-color: var(--sky);
 		min-height: 100vh;
+		box-sizing: border-box;
+	}
+	.clouds {
+		background-color: var(--sky);
 		background-image:
 			url('$lib/assets/cloud-1.png'), url('$lib/assets/cloud-4.png'), url('$lib/assets/cloud-5.png');
 		background-repeat: no-repeat, no-repeat, no-repeat;
@@ -222,14 +260,14 @@
 			bottom 0 right -100px,
 			bottom right;
 		background-size: 485px, 504px, 503px;
-		box-sizing: border-box;
-	}
-	main {
 		position: relative;
 		padding: 1rem;
 		grid-template-columns: 1fr minmax(400px, 1fr);
-		grid-template-rows: min-content 1fr;
+		grid-template-rows: 1fr 2fr;
 		gap: 1em 3em;
+		padding: 20px 20px;
+		padding-bottom: 40px;
+		box-sizing: border-box;
 	}
 	.logo {
 		height: 120px;
@@ -238,6 +276,9 @@
 	.intro {
 		margin: 0px 20px;
 		margin-top: 20px;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
 	}
 	.chart {
 		grid-column-start: 2;
@@ -252,49 +293,42 @@
 		margin-top: 30px;
 		margin-bottom: 40px;
 	}
-	h2 {
+	.pre-title {
 		font-family: 'adobe-garamond-pro', serif;
 		font-weight: 400;
 		font-size: 26px;
 		line-height: 1.4;
 		margin: 0;
 	}
-	.actions {
-		margin-top: 1.2em;
+
+	.up-next {
 		display: flex;
-		flex-wrap: wrap;
 		justify-content: center;
-		gap: 1.5em;
-	}
-	ul {
-		padding-inline-start: 20px;
-	}
-	.next-steps {
-		border: 1px solid var(--charcoal);
-		border-radius: 10px;
 		background-color: var(--cream);
-		padding: 30px;
-		margin-top: 2em;
+		padding: 60px 20px;
 	}
-	.next-steps p {
-		font-weight: 600;
-		font-size: 16px;
-	}
-	.next-steps li {
-		font-size: 15px;
-		line-height: 1.6;
-	}
-	footer {
+
+	.column {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		width: var(--width-medium);
 		text-align: center;
-		padding: 2em 3em 4em;
-		font-family: 'adobe-garamond-pro', serif;
-		font-weight: 400;
-		font-size: 18px;
-		font-style: italic;
-		color: var(--charcoal);
+		max-width: 100%;
+		margin: 40px 0px;
 	}
-	footer > a {
-		color: inherit;
+
+	.instructions {
+		margin: 20px 0px;
+	}
+
+	.instructions p {
+		font-size: 1rem;
+	}
+
+	.up-next .btn {
+		margin-bottom: 30px;
 	}
 
 	input {
@@ -343,6 +377,34 @@
 		animation-delay: 0.5s;
 	}
 
+	.conclusion {
+		background-color: var(--sky);
+		padding: 40px;
+		display: flex;
+		justify-content: center;
+	}
+
+	.fancy-link {
+		font-family: 'adobe-garamond-pro', serif;
+		font-weight: 400;
+		font-size: 26px;
+		line-height: 1.4;
+		margin: 0;
+		color: var(--charcoal);
+		text-decoration: none;
+	}
+
+	.fancy-link:hover {
+		text-decoration: underline;
+	}
+
+	label > span {
+		display: block;
+		margin-bottom: 10px;
+		font-size: 1rem;
+		color: #333;
+	}
+
 	@keyframes fadeIn {
 		0% {
 			opacity: 0;
@@ -356,13 +418,10 @@
 	}
 
 	@media screen and (min-width: 900px) {
-		main {
+		.clouds {
 			display: grid;
-			padding: 25px 3rem;
-		}
-		.actions {
-			flex-wrap: nowrap;
-			justify-content: flex-start;
+			padding: 20px 60px;
+			padding-bottom: 80px;
 		}
 		h1 {
 			margin-bottom: 0px;
@@ -373,8 +432,9 @@
 	}
 
 	@media screen and (max-width: 400px) {
-		main {
+		.clouds {
 			padding: 10px;
+			padding-bottom: 20px;
 		}
 	}
 </style>

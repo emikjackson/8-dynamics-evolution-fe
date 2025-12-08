@@ -8,8 +8,9 @@
 	--sky: #d8e3e5;
 	--blossom: #f9e4e7;
 
-	/* Some guideline widths - happy to adjust! */
+	/* Some guideline widths */
 	--width-large: 820px;
+	--width-medium: 700px;
 	--width-small: 610px;
 }
 
@@ -73,6 +74,10 @@ a {
 	transition-delay: 0.1s;
 }
 
+a {
+	color: var(--moss);
+}
+
 button:focus,
 a:focus {
 	outline: 4px solid var(--mustard);
@@ -89,6 +94,7 @@ a:focus {
 	/* fixes for discrepancies between .btn on <a> and <button> */
 	font-family: inherit;
 	text-align: center;
+	cursor: pointer;
 }
 
 .btn.primary {
@@ -116,4 +122,8 @@ a:focus {
 
 .btn.secondary:hover {
 	background-color: var(--mustard);
+}
+
+.error {
+	color: var(--rust);
 }

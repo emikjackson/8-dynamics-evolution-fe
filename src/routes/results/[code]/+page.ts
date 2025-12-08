@@ -13,21 +13,9 @@ const dbKeysToToolKeys: any = {
 	d8: 'H'
 };
 
-/** @type {import('./$types').PageLoad} */
-export async function load({ params, fetch }: { params: { code: string }; fetch: any }) {
-	const { code } = params;
-	const response = await fetch(`${PUBLIC_SERVER_URL}/api/results?resultCode=${code}`, {
-		method: 'GET'
-	});
-
-	if (!statusIsGood(response.status)) {
-		error(500);
-	}
-
-	const data = await response.json();
-
+const transformResults = (data: any) => {
 	if (!data) {
-		error(404, 'Not Found');
+		return null;
 	}
 
 	const answers = Object.keys(data)
@@ -51,9 +39,35 @@ export async function load({ params, fetch }: { params: { code: string }; fetch:
 	return {
 		answers,
 		object,
+		isStart: data?.isStart
+	};
+};
+
+/** @type {import('./$types').PageLoad} */
+export async function load({ params, fetch }: { params: { code: string }; fetch: any }) {
+	const { code } = params;
+	const response = await fetch(`${PUBLIC_SERVER_URL}/api/results?resultCode=${code}`, {
+		method: 'GET'
+	});
+
+	if (!statusIsGood(response.status)) {
+		error(500);
+	}
+
+	const data = await response.json();
+
+	if (!data) {
+		error(404, 'Not Found');
+	}
+
+	const currentResults = data.currentResults;
+	const startingPointResults = data.startingPointResults; // this should be null if it's a starting point quiz
+
+	return {
+		current: transformResults(currentResults),
+		start: transformResults(startingPointResults),
 		code
 	};
-
 	// 	return {
 	// 	answers: matches.map((m) => {
 	// 		// matches is an array of arrays with values like

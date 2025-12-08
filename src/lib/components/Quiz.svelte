@@ -9,6 +9,8 @@
 
 	let { data, isStart } = $props();
 
+	console.log('START CODE?', data.startCode);
+
 	// Cloud parallax variables
 	let scrollY = $state(0);
 	let innerWidth = $state(0);
@@ -107,6 +109,7 @@
 			}, {});
 			const resp = await _postResult({
 				...valuesByDynamic,
+				startCode: data.startCode,
 				isStart
 			});
 			const newResult = resp.data;

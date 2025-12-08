@@ -2,16 +2,22 @@
 	import { line, scaleLinear } from 'd3';
 	let {
 		answers,
+		startAnswers,
 		highlight,
 		chartWidth,
 		onHover,
-		onLeave
+		onLeave,
+		isStart,
+		skipHover
 	}: {
 		answers: Record<string, number>;
+		startAnswers: Record<string, number>;
 		highlight: number;
 		chartWidth: number;
 		onHover: CallableFunction;
 		onLeave: CallableFunction;
+		isStart?: Boolean;
+		skipHover?: Boolean;
 	} = $props();
 
 	const features = $derived(Object.keys(answers));
@@ -119,8 +125,24 @@
 </script>
 
 <div class="outer">
-	<svg id="chart" width={config.d} height={config.d} aria-hidden="true">
+	<svg
+		id="chart"
+		class:start={isStart}
+		class:overlay={startAnswers != null}
+		width={config.d}
+		height={config.d}
+		aria-hidden="true"
+	>
 		<path class="answer" stroke-width="3" opacity="0.8" d={drawAnswerShape(answers)} />
+		{#if startAnswers}
+			<path
+				class="answer"
+				class:start={true}
+				stroke-width="3"
+				opacity="0.8"
+				d={drawAnswerShape(startAnswers)}
+			/>
+		{/if}
 		<g id="ticks">
 			{#each config.ticks as tick}
 				<!-- concentric octogons -->
@@ -129,17 +151,24 @@
 			{#each radialTickLines as f, idx}
 				<line x1={config.d / 2} y1={config.d / 2} x2={f.outerX} y2={f.outerY} />
 				<line class="dash" x1={f.outerX} y1={f.outerY} x2={f.labelX} y2={f.labelY} />
-				<g
-					class="label"
-					class:highlight={highlight === idx}
-					ontouchstart={() => onHover(idx)}
-					onmouseenter={() => onHover(idx)}
-					onmouseleave={() => onLeave()}
-					aria-hidden="true"
-				>
-					<circle cx={f.labelX} cy={f.labelY} r={config.labelRadius}> </circle>
-					<text x={f.labelX} y={f.labelY}>{idx + 1}</text>
-				</g>
+				{#if skipHover}
+					<g class="label" aria-hidden="true">
+						<circle cx={f.labelX} cy={f.labelY} r={config.labelRadius}> </circle>
+						<text x={f.labelX} y={f.labelY}>{idx + 1}</text>
+					</g>
+				{:else}
+					<g
+						class="label"
+						class:highlight={highlight === idx}
+						ontouchstart={() => onHover(idx)}
+						onmouseenter={() => onHover(idx)}
+						onmouseleave={() => onLeave()}
+						aria-hidden="true"
+					>
+						<circle cx={f.labelX} cy={f.labelY} r={config.labelRadius}> </circle>
+						<text x={f.labelX} y={f.labelY}>{idx + 1}</text>
+					</g>
+				{/if}
 			{/each}
 		</g>
 		<g id="answer">
@@ -181,6 +210,13 @@
 	}
 	#answer text {
 		fill: var(--cream);
+	}
+
+	.start path.answer {
+		fill: var(--moss);
+	}
+	.start #answer circle {
+		fill: var(--moss);
 	}
 
 	text {
