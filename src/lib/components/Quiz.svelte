@@ -9,7 +9,7 @@
 
 	let { data, isStart } = $props();
 
-	console.log('START CODE?', data.startCode);
+	// console.log('START CODE?', data.startCode);
 
 	// Cloud parallax variables
 	let scrollY = $state(0);

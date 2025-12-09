@@ -30,7 +30,7 @@
 	let intervalId = $state<number>();
 	let firstRunComplete = $state(false);
 
-	console.log('ANSWERS?', answers);
+	// console.log('ANSWERS?', answers);
 
 	function startRotate() {
 		if (startAnswers) {
